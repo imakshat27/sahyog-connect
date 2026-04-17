@@ -1,6 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
+import { auth } from "@/lib/firebase";
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+
 import {
   Card,
   CardHeader,
@@ -17,15 +20,42 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
+
     try {
-      // Add your login logic here
-      console.log('Login attempt:', { email, password, rememberMe })
+      const userCred = await signInWithEmailAndPassword(auth, email, password);
+
+      const token = await userCred.user.getIdToken();
+      localStorage.setItem("token", token);
+
+      console.log("Login success");
+
+    } catch (err) {
+      console.error(err);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
+
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+
+      const token = await result.user.getIdToken();
+      localStorage.setItem("token", token);
+
+      console.log("Google login success");
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -94,7 +124,7 @@ export default function LoginPage() {
               {isLoading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
-          <br/>
+          <br />
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t"></span>
@@ -106,14 +136,15 @@ export default function LoginPage() {
             </div>
           </div>
           <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full px-4 py-2 mt-6 font-semibold text-primary-foreground bg-primary hover:opacity-90 rounded-lg transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Signing up...' : 'Sign Up with Google'}
-            </button>
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={isLoading}
+            className="w-full px-4 py-2 mt-6 font-semibold text-primary-foreground bg-primary hover:opacity-90 rounded-lg transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? 'Signing in...' : 'Sign in with Google'}
+          </button>
         </CardContent>
-            <br/>
+        <br />
         <CardFooter className="flex flex-col items-center space-y-4 pt-6">
           <a href="#" className="text-sm text-primary hover:underline">
             Forgot your password?
