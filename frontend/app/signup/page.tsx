@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
+import { auth } from "../../lib/firebase";
+import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import {
   Card,
   CardHeader,
@@ -11,21 +13,53 @@ import {
 } from '@/components/ui/card'
 
 export default function LoginPage() {
-  const [name,setName] = useState('')
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
+
     try {
-      // Add your signup logic here
-      
+      const userCred = await createUserWithEmailAndPassword(auth, email, password);
+
+      // Set display name
+      await updateProfile(userCred.user, {
+        displayName: name,
+      });
+
+      const token = await userCred.user.getIdToken();
+      localStorage.setItem("token", token);
+
+      console.log("Signup success");
+
+    } catch (err) {
+      console.error(err);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
+
+  // google signup handler
+  const handleGoogleSignup = async () => {
+    setIsLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+
+      const token = await result.user.getIdToken();
+      localStorage.setItem("token", token);
+
+      console.log("Google signup success");
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -86,7 +120,7 @@ export default function LoginPage() {
               />
             </div>
 
-            
+
 
             {/* Submit Button */}
             <button
@@ -97,7 +131,7 @@ export default function LoginPage() {
               {isLoading ? 'Signing up...' : 'Sign Up'}
             </button>
           </form>
-            <br/>
+          <br />
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t"></span>
@@ -109,14 +143,14 @@ export default function LoginPage() {
             </div>
           </div>
           <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full px-4 py-2 mt-6 font-semibold text-primary-foreground bg-primary hover:opacity-90 rounded-lg transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Signing up...' : 'Sign Up with Google'}
-            </button>
+            type="button"
+            onClick={handleGoogleSignup}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Signing up...' : 'Sign Up with Google'}
+          </button>
         </CardContent>
-            <br/>
+        <br />
         <CardFooter className="flex flex-col items-center space-y-4 pt-6">
           <p className="text-sm text-muted-foreground">
             Have an account?{' '}
