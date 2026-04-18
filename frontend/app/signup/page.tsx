@@ -3,6 +3,8 @@
 import React, { useState } from 'react'
 import { auth } from "../../lib/firebase";
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { useRouter } from "next/navigation";
+
 import {
   Card,
   CardHeader,
@@ -13,6 +15,7 @@ import {
 } from '@/components/ui/card'
 
 export default function LoginPage() {
+  const router = useRouter();
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -33,6 +36,7 @@ export default function LoginPage() {
       const token = await userCred.user.getIdToken();
       localStorage.setItem("token", token);
 
+      router.push("/questions");
       console.log("Signup success");
 
     } catch (err) {
@@ -52,6 +56,7 @@ export default function LoginPage() {
       const token = await result.user.getIdToken();
       localStorage.setItem("token", token);
 
+      router.push("/");
       console.log("Google signup success");
 
     } catch (err) {
