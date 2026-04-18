@@ -5,6 +5,8 @@ import { auth } from "../../lib/firebase";
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useRouter } from "next/navigation";
 
+import { useRouter } from "next/navigation";
+
 import {
   Card,
   CardHeader,
@@ -15,6 +17,7 @@ import {
 } from '@/components/ui/card'
 
 export default function LoginPage() {
+  const router = useRouter();
   const router = useRouter();
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
