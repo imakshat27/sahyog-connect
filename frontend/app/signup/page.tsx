@@ -14,15 +14,22 @@ import {
   CardFooter,
 } from '@/components/ui/card'
 
+import { Building2, UserCircle2 } from 'lucide-react';
+
 export default function LoginPage() {
   const router = useRouter();
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [role, setRole] = useState<'volunteer' | 'ngo' | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!role) {
+      alert("Please select a role first.");
+      return;
+    }
     setIsLoading(true);
 
     try {
@@ -36,7 +43,7 @@ export default function LoginPage() {
       const token = await userCred.user.getIdToken();
       localStorage.setItem("token", token);
 
-      router.push("/onboarding");
+      router.push(`/onboarding/${role}`);
       console.log("Signup success");
 
     } catch (err) {
@@ -48,6 +55,10 @@ export default function LoginPage() {
 
   // google signup handler
   const handleGoogleSignup = async () => {
+    if (!role) {
+      alert("Please select a role first.");
+      return;
+    }
     setIsLoading(true);
     try {
       const provider = new GoogleAuthProvider();
@@ -56,7 +67,7 @@ export default function LoginPage() {
       const token = await result.user.getIdToken();
       localStorage.setItem("token", token);
 
-      router.push("/onboarding");
+      router.push(`/onboarding/${role}`);
       console.log("Google signup success");
 
     } catch (err) {
@@ -78,6 +89,38 @@ export default function LoginPage() {
 
         <CardContent className="space-y-4">
           <form onSubmit={handleSubmit} className="space-y-4">
+            
+            {/* Role Selection */}
+            <div className="space-y-2 mb-6">
+              <label className="block text-sm font-medium">I want to join as a:</label>
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => setRole('volunteer')}
+                  className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${
+                    role === 'volunteer' 
+                      ? 'border-primary bg-primary/5 text-primary' 
+                      : 'border-border bg-background hover:border-primary/50 text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <UserCircle2 className="w-8 h-8 mb-2" />
+                  <span className="font-semibold text-sm">Volunteer</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRole('ngo')}
+                  className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${
+                    role === 'ngo' 
+                      ? 'border-primary bg-primary/5 text-primary' 
+                      : 'border-border bg-background hover:border-primary/50 text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Building2 className="w-8 h-8 mb-2" />
+                  <span className="font-semibold text-sm">NGO</span>
+                </button>
+              </div>
+            </div>
+
             {/* Name Input */}
             <div className="space-y-2">
               <label htmlFor="name" className="block text-sm font-medium">
