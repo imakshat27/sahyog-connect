@@ -1,1 +1,7 @@
 node_modules/
+
+# Environment variables
+.env.local
+
+# Firebase admin key
+backend/serviceAccountKey.json
