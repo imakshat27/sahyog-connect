@@ -4,8 +4,6 @@ import React, { useState } from 'react'
 import { auth } from "../../lib/firebase";
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { db } from "@/lib/firebase";
-import { doc, setDoc } from "firebase/firestore";
 
 import {
   Card,
