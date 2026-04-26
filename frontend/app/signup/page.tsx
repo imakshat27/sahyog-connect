@@ -4,6 +4,8 @@ import React, { useState } from 'react'
 import { auth } from "../../lib/firebase";
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import { db } from "@/lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
 
 import {
   Card,
@@ -43,7 +45,7 @@ export default function LoginPage() {
       const token = await userCred.user.getIdToken();
       localStorage.setItem("token", token);
 
-      router.push(`/onboarding/${role}`);
+      router.push(`/onboarding?role=${role}`);
       console.log("Signup success");
 
     } catch (err) {
@@ -67,7 +69,7 @@ export default function LoginPage() {
       const token = await result.user.getIdToken();
       localStorage.setItem("token", token);
 
-      router.push(`/onboarding/${role}`);
+      router.push(`/onboarding?role=${role}`);
       console.log("Google signup success");
 
     } catch (err) {

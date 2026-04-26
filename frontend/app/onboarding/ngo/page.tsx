@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState } from 'react';
-import { 
-  CheckCircle2, 
-  Circle, 
-  Building2, 
-  MapPin, 
+import { useSearchParams } from "next/navigation";
+
+import {
+  CheckCircle2,
+  Circle,
+  Building2,
+  MapPin,
   Globe,
   Leaf,
   UserCircle2
@@ -14,6 +16,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function NgoOnboardingPage() {
+  const searchParams = useSearchParams();
+  const role = searchParams.get("role");
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -25,7 +29,7 @@ export default function NgoOnboardingPage() {
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
 
   const predefinedDomains = [
-    "Education", "Environment", "Healthcare", 
+    "Education", "Environment", "Healthcare",
     "Human Rights", "Animal Welfare", "Arts & Culture",
     "Disaster Relief", "Poverty Alleviation"
   ];
@@ -40,7 +44,7 @@ export default function NgoOnboardingPage() {
     "London, UK", "Toronto, Canada", "Sydney, Australia"
   ];
 
-  const filteredCities = commonCities.filter(city => 
+  const filteredCities = commonCities.filter(city =>
     city.toLowerCase().includes(ngoDetails.location.toLowerCase())
   );
 
@@ -55,19 +59,42 @@ export default function NgoOnboardingPage() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (ngoDetails.domains.length === 0) {
       alert("Please select at least one primary domain.");
       return;
     }
     setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("User not authenticated");
+        return;
+      }
+
+      // sending data to backend
+      await fetch("http://localhost:4000/create-user", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          role: "ngo",
+          ngoDetails,
+        }),
+      });
+
+      router.push("/dashboard");
+
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong");
+    } finally {
       setIsSubmitting(false);
-      router.push('/dashboard');
-    }, 1500);
+    }
   };
 
   const steps = [
@@ -96,10 +123,10 @@ export default function NgoOnboardingPage() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col md:flex-row font-sans">
-      
+
       {/* Left Sidebar */}
       <div className="w-full md:w-[35%] lg:w-[30%] bg-white border-r border-slate-200 p-8 md:p-12 flex flex-col min-h-screen shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10">
-        
+
         {/* Logo */}
         <div className="flex items-center gap-2 mb-12">
           <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center transform -rotate-6 transition-transform hover:rotate-0 duration-300">
@@ -122,14 +149,12 @@ export default function NgoOnboardingPage() {
               <div key={step.id} className="relative">
                 {/* Connecting Line */}
                 {index < steps.length - 1 && (
-                  <div className={`absolute left-[11px] top-8 bottom-[-24px] w-[2px] transition-colors duration-300 ${
-                    step.isCompleted ? 'bg-emerald-500' : 'bg-slate-100'
-                  }`} />
+                  <div className={`absolute left-2.75 top-8 -bottom-6 w-0.5 transition-colors duration-300 ${step.isCompleted ? 'bg-emerald-500' : 'bg-slate-100'
+                    }`} />
                 )}
-                
-                <div className={`flex items-start gap-4 transition-all duration-300 ${
-                  step.isActive ? 'opacity-100 translate-x-1' : 'opacity-60 hover:opacity-80'
-                }`}>
+
+                <div className={`flex items-start gap-4 transition-all duration-300 ${step.isActive ? 'opacity-100 translate-x-1' : 'opacity-60 hover:opacity-80'
+                  }`}>
                   <div className="mt-0.5 relative bg-white z-10">
                     {step.isCompleted ? (
                       <CheckCircle2 className="w-6 h-6 text-emerald-500 fill-emerald-50" />
@@ -142,14 +167,12 @@ export default function NgoOnboardingPage() {
                     )}
                   </div>
                   <div>
-                    <h3 className={`font-semibold text-base mb-1 ${
-                      step.isActive ? 'text-slate-900' : 'text-slate-700'
-                    }`}>
+                    <h3 className={`font-semibold text-base mb-1 ${step.isActive ? 'text-slate-900' : 'text-slate-700'
+                      }`}>
                       {step.title}
                     </h3>
-                    <p className={`text-sm leading-relaxed ${
-                      step.isActive ? 'text-slate-600' : 'text-slate-400'
-                    }`}>
+                    <p className={`text-sm leading-relaxed ${step.isActive ? 'text-slate-600' : 'text-slate-400'
+                      }`}>
                       {step.description}
                     </p>
                   </div>
@@ -173,7 +196,7 @@ export default function NgoOnboardingPage() {
       {/* Right Content Area */}
       <div className="flex-1 p-8 md:p-12 lg:p-20 overflow-y-auto">
         <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-right-8 duration-500">
-          
+
           <div className="mb-10">
             <h2 className="text-3xl font-bold text-slate-900 mb-3">
               Register your NGO
@@ -184,18 +207,18 @@ export default function NgoOnboardingPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-6">
-            
+
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700 ml-1">Organization Name</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                   <Building2 className="h-5 w-5" />
                 </div>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   required
                   value={ngoDetails.name}
-                  onChange={(e) => setNgoDetails({...ngoDetails, name: e.target.value})}
+                  onChange={(e) => setNgoDetails({ ...ngoDetails, name: e.target.value })}
                   className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none text-slate-700 placeholder:text-slate-400"
                   placeholder="e.g. Global Green Initiative"
                 />
@@ -210,11 +233,10 @@ export default function NgoOnboardingPage() {
                     key={domain}
                     type="button"
                     onClick={() => toggleDomain(domain)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                      ngoDetails.domains.includes(domain)
-                        ? 'bg-emerald-500 text-white shadow-md'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                    }`}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${ngoDetails.domains.includes(domain)
+                      ? 'bg-emerald-500 text-white shadow-md'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
                   >
                     {domain}
                   </button>
@@ -231,14 +253,14 @@ export default function NgoOnboardingPage() {
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                   <MapPin className="h-5 w-5" />
                 </div>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   required
                   value={ngoDetails.location}
                   onFocus={() => setShowLocationSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 200)}
                   onChange={(e) => {
-                    setNgoDetails({...ngoDetails, location: e.target.value});
+                    setNgoDetails({ ...ngoDetails, location: e.target.value });
                     setShowLocationSuggestions(true);
                   }}
                   className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none text-slate-700 placeholder:text-slate-400"
@@ -272,13 +294,12 @@ export default function NgoOnboardingPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-semibold transition-all duration-300 ${
-                  isSubmitting 
-                    ? 'bg-emerald-400 text-white cursor-wait'
-                    : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-[0_4px_14px_0_rgb(16,185,129,0.39)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5'
-                }`}
+                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-semibold transition-all duration-300 ${isSubmitting
+                  ? 'bg-emerald-400 text-white cursor-wait'
+                  : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-[0_4px_14px_0_rgb(16,185,129,0.39)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5'
+                  }`}
               >
-                {isSubmitting ? 'Saving...' : 'Complete Setup'} 
+                {isSubmitting ? 'Saving...' : 'Complete Setup'}
                 {!isSubmitting && <CheckCircle2 className="w-5 h-5" />}
               </button>
             </div>
